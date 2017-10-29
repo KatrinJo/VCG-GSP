@@ -13,16 +13,19 @@ def runAndPrint(numbid, numitem, methodOfBid):
 	auction = Auction(numbid, numitem, methodOfBid)
 	print("The bidderName and their true value:")
 	for b in auction.bidders:
-		print(str(b.bidderName) + "," + str(b.value))
+		print("Bidder" + str(b.bidderName) + ", true value is :" + str(b.intrinsicValue) + ", bid is " + str(b.bidValue))
 
 	if methodOfBid == 'VCG':
 		auction.executeVCG()
 	else:
 		auction.executeGSP()
 	print(" ")
-	print(auction.allocation)
-	print(auction.finalBids)
-	print(auction.priceBids)
+	print("valueVac = " + str(auction.valueVec))
+	print("bidVec = " + str(auction.bidVec))
+	print("allocation = " + str(auction.allocation))
+	print("The bidders should pay = " + str(auction.priceBids))
+	print("revenue = " + str(auction.revenue))
+	print("SocialWelfare = " + str(auction.SocialWelfare))
 
 if __name__ == '__main__':
 	numbid = int(sys.argv[1])

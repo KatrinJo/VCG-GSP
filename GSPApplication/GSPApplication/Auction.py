@@ -53,9 +53,11 @@ class Auction:
     for i in range(self.numOfBidder):
       self.bidGetSlot[tmp[i]]=i # [2, 6, 4, 7, 5, 3, 0, 1]表示bidder0号拿slot2号，bidder1号拿slot6号
     
-    for i in range(self.numOfSlots): # 实际每个人要出的钱
+    for i in range(self.numOfSlots-1): # 实际每个人要出的钱
       self.priceBids[tmp[i]] = sortBid[i+1]
       self.bidders[tmp[i]].finalPrice = self.priceBids[tmp[i]]
+    self.priceBids[tmp[self.numOfSlots-1]] = 0
+    self.bidders[tmp[self.numOfSlots-1]].finalPrice = 0
 
     alpha = np.append(self.slots.clickRate,[0 for i in range(self.numOfBidder - self.numOfSlots)])
     bidPrice = np.append(sortBid[1:],0)
@@ -78,17 +80,22 @@ class Auction:
 
     for i in range(self.numOfBidder): # 实际每个人要出的钱
       alphaSlotI = self.bidGetSlot[i] # 表示第i个bidder拿到的slot位
+      print("alphaSlotI = "+str(alphaSlotI))
       if alpha[alphaSlotI] == 0:
         pass
       
       suma = 0
-      for j in list(range(alphaSlotI+1, self.numOfBidder+1)):
-        suma = suma + (alpha(j-1)-alpha(j)) * bv(self.allocation[j])
+      for j in list(range(alphaSlotI+1, self.numOfBidder)):
+        print("j = " + str(j) + ", alpha[j-i] = " + str(alpha[j-1]) + ", alpha[j] = " + str(alpha[j]))
+        suma = suma + (alpha[j-1]-alpha[j]) * bv[self.allocation[j]]
       self.priceBids[i] = suma / alpha[alphaSlotI]
       self.bidders[i].finalPrice = self.priceBids[i]
+      print("priceBids = "+str(self.priceBids[i])+" while the trueVal = " + str(self.valueVec[i]) + ", and the bidVal = " + str(self.bidVec[i]))
     
     sumRevenue = 0
-    for i in list(range(2,self.numOfBidder+1)):
-      tmp = (i-1)*(alpha(i-1)-alpha(i))*self.bidders[i].finalPrice # 根据GSP是finalPrice，但是由于VCG是truth-telling，finalPrice和实际value一样
+    for i in list(range(1,self.numOfBidder)):
+      tmp = (i-1)*(alpha[i-1]-alpha[i])*self.bidders[i].finalPrice # 根据GSP是finalPrice，但是由于VCG是truth-telling，finalPrice和实际value一样
       sumRevenue = sumRevenue + tmp
     self.revenue = sumRevenue
+    bidValue = np.array(self.valueVec)[self.allocation]
+    self.SocialWelfare = np.sum(np.multiply(alpha, bidValue))
