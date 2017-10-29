@@ -26,6 +26,7 @@ def runAndPrint(numbid, numitem, methodOfBid):
 	print("The bidders should pay = " + str(auction.priceBids))
 	print("revenue = " + str(auction.revenue))
 	print("SocialWelfare = " + str(auction.SocialWelfare))
+	print("clickThroughRate = " + str(auction.slots.clickRate))
 
 if __name__ == '__main__':
 	numbid = int(sys.argv[1])

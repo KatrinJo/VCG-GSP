@@ -77,21 +77,18 @@ class Auction:
     
     alpha = np.append(self.slots.clickRate,[0 for i in range(self.numOfBidder - self.numOfSlots)])
     alphaBidGetSlot = alpha[self.bidGetSlot]
-
+    
+    
     for i in range(self.numOfBidder): # 实际每个人要出的钱
       alphaSlotI = self.bidGetSlot[i] # 表示第i个bidder拿到的slot位
-      print("alphaSlotI = "+str(alphaSlotI))
       if alpha[alphaSlotI] == 0:
-        pass
-      
+        continue
       suma = 0
       for j in list(range(alphaSlotI+1, self.numOfBidder)):
-        print("j = " + str(j) + ", alpha[j-i] = " + str(alpha[j-1]) + ", alpha[j] = " + str(alpha[j]))
         suma = suma + (alpha[j-1]-alpha[j]) * bv[self.allocation[j]]
       self.priceBids[i] = suma / alpha[alphaSlotI]
       self.bidders[i].finalPrice = self.priceBids[i]
-      print("priceBids = "+str(self.priceBids[i])+" while the trueVal = " + str(self.valueVec[i]) + ", and the bidVal = " + str(self.bidVec[i]))
-    
+      
     sumRevenue = 0
     for i in list(range(1,self.numOfBidder)):
       tmp = (i-1)*(alpha[i-1]-alpha[i])*self.bidders[i].finalPrice # 根据GSP是finalPrice，但是由于VCG是truth-telling，finalPrice和实际value一样
