@@ -13,11 +13,9 @@ class Bidder:
     self.bidderName = name
     self.intrinsicValue = v
     self.finalPrice = 0.0
-    if function == 'truth' or function == 'VCG':
+    if function == 'truth':
       self.bidValue = v
-    elif function == 'random' or function == 'GSP':
-      # self.bidValue = np.random.rand(1,1)[0][0] * 100
-      # else:
+    elif function == 'random':
       self.bidValue = b
 
   def utility(alpha):
