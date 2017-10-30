@@ -13,7 +13,7 @@ from Bidder import Bidder
 from Auction import Auction
 from Slots import Slots
 
-def runAndPrint(numbid, numitem, truthOrRandom):
+def runAndPrint(numbid, numitem, truthOrRandom, repeatTimes):
     #str = "The number of Bidders is " + str(numbid) + ", and the number of Items
     #is " + str(numitem)
     auction = Auction(numbid, numitem, truthOrRandom)
@@ -24,34 +24,47 @@ def runAndPrint(numbid, numitem, truthOrRandom):
     str(b.intrinsicValue) + ", bid is " + str(b.bidValue))
     print(" ")
     '''
-    auction.executeVCG()
-    SWVCG = auction.SocialWelfare
-    RVCG = auction.revenue
-    '''
-    print("Now it is VCG result: ")
-    print("valueVac = " + str(auction.valueVec))
-    print("bidVec = " + str(auction.bidVec))
-    print("allocation = " + str(auction.allocation))
-    print("The bidders should pay = " + str(auction.priceBids))
-    print("revenue = " + str(auction.revenue))
-    print("SocialWelfare = " + str(auction.SocialWelfare))
-    print("clickThroughRate = " + str(auction.slots.clickRate))
-    print(" ")
-    '''
-    auction.executeGSP()
-    SWGSP = auction.SocialWelfare
-    RGSP = auction.revenue
-    '''
-    print("Now it is GSP result: ")
-    print("valueVac = " + str(auction.valueVec))
-    print("bidVec = " + str(auction.bidVec))
-    print("allocation = " + str(auction.allocation))
-    print("The bidders should pay = " + str(auction.priceBids))
-    print("revenue = " + str(auction.revenue))
-    print("SocialWelfare = " + str(auction.SocialWelfare))
-    print("clickThroughRate = " + str(auction.slots.clickRate))
-    print(" ")
-    '''
+    SWVCGseq = []
+    RVCGseq = []
+    SWGSPseq = []
+    RGSPseq = []
+    for i in range(repeatTimes):
+        auction.executeVCG()
+        swVCG = auction.SocialWelfare
+        rVCG = auction.revenue
+        SWVCGseq = np.append(SWVCGseq, swVCG)
+        RVCGseq = np.append(RVCGseq, rVCG)
+        '''
+        print("Now it is VCG result: ")
+        print("valueVac = " + str(auction.valueVec))
+        print("bidVec = " + str(auction.bidVec))
+        print("allocation = " + str(auction.allocation))
+        print("The bidders should pay = " + str(auction.priceBids))
+        print("revenue = " + str(auction.revenue))
+        print("SocialWelfare = " + str(auction.SocialWelfare))
+        print("clickThroughRate = " + str(auction.slots.clickRate))
+        print(" ")
+        '''
+        auction.executeGSP()
+        swGSP = auction.SocialWelfare
+        rGSP = auction.revenue
+        SWGSPseq = np.append(SWGSPseq, swGSP)
+        RGSPseq = np.append(RGSPseq, rGSP)
+        '''
+        print("Now it is GSP result: ")
+        print("valueVac = " + str(auction.valueVec))
+        print("bidVec = " + str(auction.bidVec))
+        print("allocation = " + str(auction.allocation))
+        print("The bidders should pay = " + str(auction.priceBids))
+        print("revenue = " + str(auction.revenue))
+        print("SocialWelfare = " + str(auction.SocialWelfare))
+        print("clickThroughRate = " + str(auction.slots.clickRate))
+        print(" ")
+        '''
+    SWVCG = np.mean(SWVCGseq)
+    RVCG = np.mean(RVCGseq)
+    SWGSP = np.mean(SWGSPseq) 
+    RGSP = np.mean(RGSPseq)
     return [SWVCG, RVCG, SWGSP, RGSP]
 
 if __name__ == '__main__':
@@ -68,7 +81,7 @@ if __name__ == '__main__':
     for num in list(range(1,21)):
         for i in range(2):
             print("The number of Bidders is " + str(num) + ", and the number of Items is " + str(num) + ", " + truthOrRand[i])
-            [swVCG, rVCG, swGSP, rGSP] = runAndPrint(num, num, truthOrRand[i])
+            [swVCG, rVCG, swGSP, rGSP] = runAndPrint(num, num, truthOrRand[i], 10000)
             SWVCG[i] = np.append(SWVCG[i], swVCG)
             RVCG[i] = np.append(RVCG[i], rVCG)
             SWGSP[i] = np.append(SWGSP[i], swGSP)
