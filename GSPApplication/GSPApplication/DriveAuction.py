@@ -16,7 +16,7 @@ from Slots import Slots
 def runAndPrint(numbid, numitem, truthOrRandom, repeatTimes):
     #str = "The number of Bidders is " + str(numbid) + ", and the number of Items
     #is " + str(numitem)
-    auction = Auction(numbid, numitem, truthOrRandom)
+    # auction = Auction(numbid, numitem, truthOrRandom, seedValue)
     '''
     print("The bidderName and their true value:")
     for b in auction.bidders:
@@ -29,6 +29,7 @@ def runAndPrint(numbid, numitem, truthOrRandom, repeatTimes):
     SWGSPseq = []
     RGSPseq = []
     for i in range(repeatTimes):
+        auction = Auction(numbid, numitem, truthOrRandom)
         auction.executeVCG()
         swVCG = auction.SocialWelfare
         rVCG = auction.revenue
@@ -65,6 +66,8 @@ def runAndPrint(numbid, numitem, truthOrRandom, repeatTimes):
     RVCG = np.mean(RVCGseq)
     SWGSP = np.mean(SWGSPseq) 
     RGSP = np.mean(RGSPseq)
+    print("seq: RVCG[0] = " + str(RVCGseq[0]) + ", RVCG[n-1] = " + str(RVCGseq[repeatTimes-1]))
+    print("seq: RGSP[0] = " + str(RGSPseq[0]) + ", RGSP[n-1] = " + str(RGSPseq[repeatTimes-1]))
     return [SWVCG, RVCG, SWGSP, RGSP]
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ class Auction:
     #SocialWelfare = 0
 
     def __init__(self, numbid, numslots, truthOrRandom):
+        self.maxValueBid = 10
         self.bidders = [] # 出价人序列,[Bidder,Bidder,Bidder]
         self.bidVec = [] # 出价向量
 
@@ -29,17 +30,18 @@ class Auction:
         self.priceBids = [0 for i in range(self.numOfBidder)]
         self.revenue = 0
         self.SocialWelfare = 0
-
-        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*100,reverse=True) # 从大到小
+        
+        # np.random.seed(seed = seedValue)
+        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid,reverse=True) # 从大到小
+        tmpBidVec = np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid
         self.valueVec = tmpValueVec
+        if truthOrRandom == 'truth':
+            tmpBidVec = tmpValueVec
+        self.bidVec = tmpBidVec
+        
         for i in range(self.numOfBidder):
-            b = np.random.rand(1,1)[0][0]*100
-            if truthOrRandom == 'truth':
-                b = tmpValueVec[i]
-            self.bidVec.append(b)
-            self.bidders.append(Bidder(i,tmpValueVec[i],b,truthOrRandom))
+            self.bidders.append(Bidder(i,tmpValueVec[i],tmpBidVec[i],truthOrRandom))
         self.slots = Slots(self.numOfSlots,self.numOfBidder)
-
   
     def clearData(self):
         self.numOfBidder = int(numbid)
@@ -51,12 +53,12 @@ class Auction:
         self.revenue = 0
         self.SocialWelfare = 0
 
-        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*100,reverse=True) # 从大到小
+        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid,reverse=True) # 从大到小
         self.valueVec = tmpValueVec
         self.bidders.clear()
         
         for i in range(self.numOfBidder):
-            b = np.random.rand(1,1)[0][0]*100
+            b = np.random.rand(1,1)[0][0]*self.maxValueBid
             if truthOrRandom == 'truth':
                 b = tmpValueVec[i]
             self.bidVec.append(b)
