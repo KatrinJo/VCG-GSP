@@ -2,6 +2,8 @@ from Bidder import Bidder
 from Slots import Slots
 import numpy as np
 import string
+import operator
+# sorted_x = sorted(x, key=operator.attrgetter('score'))
 
 class Auction:
     #bidders = [] # 出价人序列,[Bidder,Bidder,Bidder]
@@ -18,7 +20,7 @@ class Auction:
     #revenue = 0
     #SocialWelfare = 0
 
-    def __init__(self, numbid, numslots, truthOrRandom):
+    def __init__(self, numbid, numslots, valueGenFunc, truthOrRandom):
         self.maxValueBid = 10
         self.bidders = [] # 出价人序列,[Bidder,Bidder,Bidder]
         self.bidVec = [] # 出价向量
@@ -30,39 +32,47 @@ class Auction:
         self.priceBids = [0 for i in range(self.numOfBidder)]
         self.revenue = 0
         self.SocialWelfare = 0
+        self.truthOrNot = truthOrRandom
+        self.valueGenerator = valueGenFunc
         
-        # np.random.seed(seed = seedValue)
-        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid,reverse=True) # 从大到小
-        tmpBidVec = np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid
-        self.valueVec = tmpValueVec
-        if truthOrRandom == 'truth':
-            tmpBidVec = tmpValueVec
-        self.bidVec = tmpBidVec
-        
+        tmpValueVec = []
+        tmpBidVec = []
+        bidder = []
         for i in range(self.numOfBidder):
-            self.bidders.append(Bidder(i,tmpValueVec[i],tmpBidVec[i],truthOrRandom))
+            bidder.append(Bidder(i,[0,self.maxValueBid],valueGenFunc,truthOrRandom))
+        bidder = sorted(bidder, key=operator.attrgetter('intrinsicValue'))
+
+        for i in range(self.numOfBidder):
+            bidder[i].bidderName = i
+            tmpValueVec = np.append(tmpValueVec, bidder[i].intrinsicValue)
+            tmpBidVec = np.append(tmpBidVec, bidder[i].bidValue)
+        self.bidders = bidder
+        self.valueVec = tmpValueVec
+        self.bidVec = tmpBidVec
         self.slots = Slots(self.numOfSlots,self.numOfBidder)
   
     def clearData(self):
-        self.numOfBidder = int(numbid)
-        self.numOfSlots = int(numslots)
         self.allocation = [ -1 for i in range(self.numOfBidder)] # 从numOfSlots~numOfBidder-1号的是点击率为0的
         self.bidGetSlot = [ -1 for i in range(self.numOfBidder)] # slot编号>=numOfSlots的相当于lose the auction
-
         self.priceBids = [0 for i in range(self.numOfBidder)]
         self.revenue = 0
         self.SocialWelfare = 0
-
-        tmpValueVec = sorted(np.random.rand(1,self.numOfBidder)[0]*self.maxValueBid,reverse=True) # 从大到小
-        self.valueVec = tmpValueVec
         self.bidders.clear()
         
+        tmpValueVec = []
+        tmpBidVec = []
+        bidder = []
         for i in range(self.numOfBidder):
-            b = np.random.rand(1,1)[0][0]*self.maxValueBid
-            if truthOrRandom == 'truth':
-                b = tmpValueVec[i]
-            self.bidVec.append(b)
-            self.bidders.append(Bidder(i,tmpValueVec[i],b,truthOrRandom))
+            bidder.append(Bidder(i,[0,self.maxValueBid],self.valueGenerator,self.truthOrNot))
+        bidder = sorted(bidder, key=operator.attrgetter('intrinsicValue'))
+
+        for i in range(self.numOfBidder):
+            bidder[i].bidderName = i
+            tmpValueVec = np.append(tmpValueVec, bidder[i].intrinsicValue)
+            tmpBidVec = np.append(tmpBidVec, bidder[i].bidValue)
+        self.bidders = bidder
+        self.valueVec = tmpValueVec
+        self.bidVec = tmpBidVec
         self.slots = Slots(self.numOfSlots,self.numOfBidder)
   
     def executeGSP(self):

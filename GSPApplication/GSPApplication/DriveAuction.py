@@ -1,4 +1,5 @@
 import sys
+import io
 import numpy as np
 import string
 import os
@@ -13,55 +14,26 @@ from Bidder import Bidder
 from Auction import Auction
 from Slots import Slots
 
-def runAndPrint(numbid, numitem, truthOrRandom, repeatTimes):
-    #str = "The number of Bidders is " + str(numbid) + ", and the number of Items
-    #is " + str(numitem)
-    # auction = Auction(numbid, numitem, truthOrRandom, seedValue)
-    '''
-    print("The bidderName and their true value:")
-    for b in auction.bidders:
-    print("Bidder" + str(b.bidderName) + ", true value is :" +
-    str(b.intrinsicValue) + ", bid is " + str(b.bidValue))
-    print(" ")
-    '''
-    SWVCGseq = []
-    RVCGseq = []
-    SWGSPseq = []
-    RGSPseq = []
+
+
+def runAndPrint(numbid, numitem, valueGenFunc, truthOrRandom, repeatTimes):
+    auction = Auction(numbid, numitem, valueGenFunc, truthOrRandom)
+    SWVCGseq, RVCGseq, SWGSPseq, RGSPseq  = [], [], [], []
     for i in range(repeatTimes):
-        auction = Auction(numbid, numitem, truthOrRandom)
+        # auction = Auction(numbid, numitem, truthOrRandom)
+        auction.clearData()
+
         auction.executeVCG()
         swVCG = auction.SocialWelfare
         rVCG = auction.revenue
         SWVCGseq = np.append(SWVCGseq, swVCG)
         RVCGseq = np.append(RVCGseq, rVCG)
-        '''
-        print("Now it is VCG result: ")
-        print("valueVac = " + str(auction.valueVec))
-        print("bidVec = " + str(auction.bidVec))
-        print("allocation = " + str(auction.allocation))
-        print("The bidders should pay = " + str(auction.priceBids))
-        print("revenue = " + str(auction.revenue))
-        print("SocialWelfare = " + str(auction.SocialWelfare))
-        print("clickThroughRate = " + str(auction.slots.clickRate))
-        print(" ")
-        '''
+
         auction.executeGSP()
         swGSP = auction.SocialWelfare
         rGSP = auction.revenue
         SWGSPseq = np.append(SWGSPseq, swGSP)
         RGSPseq = np.append(RGSPseq, rGSP)
-        '''
-        print("Now it is GSP result: ")
-        print("valueVac = " + str(auction.valueVec))
-        print("bidVec = " + str(auction.bidVec))
-        print("allocation = " + str(auction.allocation))
-        print("The bidders should pay = " + str(auction.priceBids))
-        print("revenue = " + str(auction.revenue))
-        print("SocialWelfare = " + str(auction.SocialWelfare))
-        print("clickThroughRate = " + str(auction.slots.clickRate))
-        print(" ")
-        '''
     SWVCG = np.mean(SWVCGseq)
     RVCG = np.mean(RVCGseq)
     SWGSP = np.mean(SWGSPseq) 
@@ -74,71 +46,65 @@ if __name__ == '__main__':
     # numbid = int(sys.argv[1])
     # numitem = int(sys.argv[2])
     # method = ['VCG','GSP']
-    truthOrRand = ['random', 'truth']
     # methodOfBid = sys.argv[3]
     # truthOrRandom = sys.argv[4]
-    SWVCG = [[],[]]
-    SWGSP = [[],[]]
-    RVCG = [[],[]]
-    RGSP = [[],[]]
-    for num in list(range(1,21)):
-        for i in range(2):
-            print("The number of Bidders is " + str(num) + ", and the number of Items is " + str(num) + ", " + truthOrRand[i])
-            [swVCG, rVCG, swGSP, rGSP] = runAndPrint(num, num, truthOrRand[i], 10000)
-            SWVCG[i] = np.append(SWVCG[i], swVCG)
-            RVCG[i] = np.append(RVCG[i], rVCG)
-            SWGSP[i] = np.append(SWGSP[i], swGSP)
-            RGSP[i] = np.append(RGSP[i], rGSP)
-            print("SWVCG = " + str(swVCG) + ", SWGSP = " + str(swGSP) + ", RVCG = " + str(rVCG) + ", RGSP = " + str(rGSP))
-            # TODO : bidding_simulator-master -> stats.py draw the scatter plot
-    # print(SWVCG)
-    # print(SWGSP)
+    valueGenFunc, truthOrRandom = ['uniform', 'uniform-BsmallthanV', 'normal'], ['random', 'truth']
+    lenValueGenFunc = len(valueGenFunc)
+    SWVCG = [[[] for i in range(lenValueGenFunc)] for j in range(2)]#[[[]]*(lenValueGenFunc)]*2
+    SWGSP = [[[] for i in range(lenValueGenFunc)] for j in range(2)]
+    RVCG = [[[] for i in range(lenValueGenFunc)] for j in range(2)]
+    RGSP = [[[] for i in range(lenValueGenFunc)] for j in range(2)]
+
+    for j in range(2):
+        for num in list(range(1,21)):
+            for i in range(2):
+                print("The number of Bidders is " + str(num) + ", and the number of Items is " + str(num) + ", " + truthOrRandom[i])
+                [swVCG, rVCG, swGSP, rGSP] = runAndPrint(num, num, valueGenFunc[j],truthOrRandom[i], 10000)
+                SWVCG[j][i] = np.append(SWVCG[j][i], swVCG)
+                RVCG[j][i] = np.append(RVCG[j][i], rVCG)
+                SWGSP[j][i] = np.append(SWGSP[j][i], swGSP)
+                RGSP[j][i] = np.append(RGSP[j][i], rGSP)
+                print("SWVCG = " + str(swVCG) + ", SWGSP = " + str(swGSP) + ", RVCG = " + str(rVCG) + ", RGSP = " + str(rGSP))
+
     x_axis=[i for i in range(1,21)]
-    
-    pylab.figure(1)
+        
+    # print(SWVCG[0][0])
+    Revenue = io.open("Revenue.txt","w")
+    SocialWelfare = io.open("SocialWelfare.txt","w")
+    for j in range(2):
+        for i in range(2):
+            SocialWelfare.writelines("SWVCG" + valueGenFunc[j] + " " + truthOrRandom[i] +str(SWVCG[j][i]) + "\n")
+            SocialWelfare.writelines("SWGSP" + valueGenFunc[j] + " " + truthOrRandom[i] +str(SWGSP[j][i]) + "\n")
+            Revenue.writelines("RVCG" + valueGenFunc[j] + " " + truthOrRandom[i] +str(RVCG[j][i]) + "\n")
+            Revenue.writelines("RGSP" + valueGenFunc[j] + " " + truthOrRandom[i] +str(RGSP[j][i]) + "\n")
+    Revenue.close()
+    SocialWelfare.close()
+    plt.figure(1)
     plt.xlabel("The number of bidder and slot")
     plt.ylabel("social welfare")
-    plt.title("random - social welfare with different number of bidder and slot")
-    plt.plot(x_axis,SWVCG[0],label = 'VCG')
-    plt.plot(x_axis,SWGSP[0],label = 'GSP')
-    #print("SWVCG[0] = " + str(SWVCG[0]))
-    #print("SWGSP[0] = " + str(SWGSP[0]))
-    # plt.show()
+    plt.title("social welfare with different number of bidder and slot")
+    plt.plot(x_axis,SWVCG[0][0],label = truthOrRandom[0] + ' VCG')
+    plt.plot(x_axis,SWGSP[0][0],label = truthOrRandom[0] + ' GSP')
+    plt.plot(x_axis,SWVCG[0][1],label = truthOrRandom[1] + ' VCG')
+    plt.plot(x_axis,SWGSP[0][1],label = truthOrRandom[1] + ' GSP')
+    plt.plot(x_axis,SWVCG[1][0],label = "b<v " + truthOrRandom[0] + ' VCG')
+    plt.plot(x_axis,SWGSP[1][0],label = "b<v " + truthOrRandom[0] + ' GSP')
+    plt.plot(x_axis,SWVCG[1][1],label = "b<v " + truthOrRandom[1] + ' VCG')
+    plt.plot(x_axis,SWGSP[1][1],label = "b<v " + truthOrRandom[1] + ' GSP')
     plt.legend()
-    plt.savefig("random - social welfare.png")
+    plt.savefig("social welfare.png")
 
     plt.figure(2)
     plt.xlabel("The number of bidder and slot")
-    plt.ylabel("social welfare")
-    plt.title("truth - social welfare with different number of bidder and slot")
-    plt.plot(x_axis,SWVCG[1],label = 'VCG')
-    plt.plot(x_axis,SWGSP[1],label = 'GSP')
-    #print("SWVCG[1] = " + str(SWVCG[1]))
-    #print("SWGSP[1] = " + str(SWGSP[1]))
-    # plt.show()
-    plt.legend()
-    plt.savefig("truth - social welfare.png")
-
-    plt.figure(3)
-    plt.xlabel("The number of bidder and slot")
     plt.ylabel("revenue")
-    plt.title("random - revenue with different number of bidder and slot")
-    plt.plot(x_axis,RVCG[0],label = 'VCG')
-    plt.plot(x_axis,RGSP[0],label = 'GSP')
-    #print("RVCG[0] = " + str(RVCG[0]))
-    #print("RGSP[0] = " + str(RGSP[0]))
-    # plt.show()
+    plt.title("revenue with different number of bidder and slot")
+    plt.plot(x_axis,RVCG[0][0],label = truthOrRandom[0] + ' VCG')
+    plt.plot(x_axis,RGSP[0][0],label = truthOrRandom[0] + ' GSP')
+    plt.plot(x_axis,RVCG[0][1],label = truthOrRandom[1] + ' VCG')
+    plt.plot(x_axis,RGSP[0][1],label = truthOrRandom[1] + ' GSP')
+    plt.plot(x_axis,RVCG[1][0],label = "b<v " + truthOrRandom[0] + ' VCG')
+    plt.plot(x_axis,RGSP[1][0],label = "b<v " + truthOrRandom[0] + ' GSP')
+    plt.plot(x_axis,RVCG[1][1],label = "b<v " + truthOrRandom[1] + ' VCG')
+    plt.plot(x_axis,RGSP[1][1],label = "b<v " + truthOrRandom[1] + ' GSP')
     plt.legend()
-    plt.savefig("random - revenue.png")
-    
-    plt.figure(4)
-    plt.xlabel("The number of bidder and slot")
-    plt.ylabel("revenue")
-    plt.title("truth - revenue with different number of bidder and slot")
-    plt.plot(x_axis,RVCG[1],label = 'VCG')
-    plt.plot(x_axis,RGSP[1],label = 'GSP')
-    #print("RVCG[1] = " + str(RVCG[1]))
-    #print("RGSP[1] = " + str(RGSP[1]))
-    # plt.show()
-    plt.legend()
-    plt.savefig("truth - revenue.png")
+    plt.savefig("revenue.png")
