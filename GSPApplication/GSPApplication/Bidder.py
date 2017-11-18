@@ -31,5 +31,8 @@ class Bidder:
             elif vfunction == 'normal':
                 self.intrinsicValue = np.abs((np.random.randn(1)+1)*(ValueRange[1] - ValueRange[0])/2)[0]
 
-    def utility(alpha):
+    def utility(self, alpha):
+        # return alpha * (self.intrinsicValue - self.finalPrice)
         return alpha * (self.intrinsicValue - self.finalPrice)
+        sum = 0
+        
