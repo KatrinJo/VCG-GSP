@@ -28,6 +28,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GSPApplication.py" />
+    <Compile Include="historyAuctionTuple.py" />
+    <Compile Include="historyBidderTuple.py" />
     <Compile Include="Slots.py">
       <SubType>Code</SubType>
     </Compile>
